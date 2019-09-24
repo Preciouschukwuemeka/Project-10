@@ -66,15 +66,15 @@
             }
 
             // Users can delete course (Provided user signed up for the course)
-            delete = async (path) => {
+             delete = async (path) => {
                 const { context, history } = this.props;
                 const { emailAddress,password } = context.authenticatedUser;
                 const decryptedPass = context.cryptr.decrypt(password);//paswword decrypted 
                 await context.data.deleteCourses( path, emailAddress, decryptedPass );
                 history.push('/');//Will take user home after deletion
-            }
+             }
             
-            render(){
+             render(){
 
                 const {
                     id,
@@ -175,5 +175,5 @@
                 );
             }
         }
-
+    
         export default CourseDetail
