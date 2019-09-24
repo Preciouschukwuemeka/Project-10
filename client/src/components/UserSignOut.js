@@ -1,11 +1,10 @@
-import React from './node_modules/react';
-import {Redirect} from './node_modules/react-router-dom';
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
-const UserSignOut = ({signOut}) => {
+export default function SignOut({ context:{ actions:{ signOut } } }){
     signOut();
-    return(
-        <Redirect to="/"/>
-    );
+    // Clears authentication credential after sign on
+    Cookies.remove('authenticatedUser');
+    return <Redirect to='/'/>;
 }
-
-export default UserSignOut;

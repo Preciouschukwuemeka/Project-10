@@ -1,140 +1,74 @@
-import React, { Component } from 'react';
-import Courses from './components/Courses';
-import CourseDetail from './components/CourseDetail';
-import UserSignIn from './components/UserSignIn';
-import UserSignUp from './components/UserSignUp';
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect
+} from 'react-router-dom';
+
+//components
 import Header from './components/Header';
-import CreateCourse from './components/CreateCourse';
+import Courses from './components/Courses';
+import NewCourse from './components/CreateCourse';
 import UpdateCourse from './components/UpdateCourse';
-import UserSignOut from './components/UserSignOut'; 
-import PrivateRoute from './components/PrivateRoute';
-import NotFound from './components/NotFound';
-import Forbidden from './components/Forbidden';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import CourseDetail from './components/CourseDetail';
+import UserSignUp from './components/UserSignUp';
+import UserSignIn from './components/UserSignIn';
+import UserSignOut from './components/UserSignOut';
+import ErrorHandler from './components/ErrorHandler';
+import withContext from './Context';
 
-var cors = require('cors')
-app.use(cors())
+//components withContext
+const HeaderWithContext = withContext(Header);
+const CoursesWithContext = withContext(Courses);
+const NewCourseWithContext = withContext(NewCourse);
+const UpdateCourseWithContext = withContext(UpdateCourse);
+const UsersCourseWithContext = withContext(CourseDetail);
+const SignUpWithContext = withContext(UserSignUp);
+const SignInWithContext = withContext(UserSignIn);
+const SignOutWithContext = withContext(UserSignOut);
+const ErrorHandlerWithContext = withContext(ErrorHandler);
 
 
-
-class App extends Component {
-
-  state = {
-    user: undefined
-  }
-  mounted = false;
-  prevLocation = ('/');
-  componentDidMount(){
-    this.mounted = true;
-    if(JSON.parse(localStorage.getItem('user'))){
-      this.setState({
-        user: { 
-          ...JSON.parse(localStorage.getItem('user')),
-          headers: JSON.parse(localStorage.getItem('headers'))
-        }
-      });
-    }else{
-      this.setState({user:null});
-    }
-  }
-  componentWillUnmount(){
-    this.mounted = false;
-  }
-  
-  signOut(){
-    this.setState({
-      user: null
-    }, () => {
-      localStorage.setItem('user',null);
-      localStorage.setItem('headers',null);
-    });
-  }
-
-  signUp(firstName, lastName, email, password){
-    let data = JSON.stringify({
-      firstName: firstName,
-      lastName: lastName,
-      emailAddress: email,
-      password: password
-    });
-
-    return fetch('http://localhost:5000/api/users', {
-      method: "POST",
-      body: data,
-      headers:{
-          'Content-Type': 'application/json'
+const PrivateRoute = withContext(({context,component: Component, ...rest }) => {
+  return (
+    // Show the component only when the user is logged in
+    // Otherwise, redirect the user to /signin page
+    <Route
+      {...rest}
+      render={(props) => context.authenticatedUser !== null ? (
+          <Component {...props} />
+        ) : (
+          <Redirect to={{
+            pathname: '/signin',
+            state: { from: props.location }
+          }} />
+        )
       }
-    })
-      .then(res => {
-        if(res.status === 201){
-          this.signIn(email,password);
-        }else{
-          return res.json()
-        }
-      });
-  }
+    />
+  );
+})
 
-  signIn(email, password){
-    const headers = new Headers();
-    headers.set('Authorization', 'Basic ' + Buffer.from(email + ":" + password).toString('base64'));
-    headers.append('Content-Type', 'application/json')
-    return fetch('http://localhost:5000/api/users', {
-      method: "GET",
-      headers: headers
-    })
-    .then(res =>{
-      if(res.status === 200){
-        res.json()
-          .then(res =>
-            this.setState({
-              user :
-              {
-                id: res.id,
-                firstName: res.firstName,
-                lastName: res.lastName,
-                headers: headers
-              }
-            }, () => {
-              localStorage.setItem('user', JSON.stringify(this.state.user));
-              let storedHeaders = [];
-              storedHeaders.push(["authorization", headers.get('Authorization')]);
-              storedHeaders.push(["content-type", headers.get('Content-Type')]);
-              localStorage.setItem('headers', JSON.stringify(storedHeaders));
-            })
-          );
-          return(200);
-      }else{
-        return(422);
-      }
-    });
-  }
 
-  setPrevLocation(location){
-    this.prevLocation = location;
-  }
-
-  render() {
-    if(!this.mounted)return(<div></div>);
-    return (
-      <BrowserRouter>
-        <div className="App">
-          <Header user={this.state.user}/>
-          <Switch>
-            <Route exact path="/" component={Courses} />
-            <Route path="/signin" render={({history}) => <UserSignIn history={history} setPrevLocation={this.setPrevLocation.bind(this)} prevLocation={this.prevLocation} signIn={this.signIn.bind(this)} />} />
-            <Route path="/signup" render={({history}) => <UserSignUp history={history} signUp={this.signUp.bind(this)} />} />
-            <Route path="/signout" render={() => <UserSignOut signOut={this.signOut.bind(this)} />} />
-            <PrivateRoute path="/courses/:id/update" setPrevLocation={this.setPrevLocation.bind(this)} user={this.state.user} component={({match, history}) => <UpdateCourse history={history} user={this.state.user} id={match.params.id}/>} />
-            <PrivateRoute path="/courses/create" setPrevLocation={this.setPrevLocation.bind(this)} user={this.state.user} component={CreateCourse}/>} />
-            <Route exact path="/courses/:id" render={({match, history}) => <CourseDetail history={history} user={this.state.user} id={match.params.id}/>} />
-            <Route path="/forbidden" component={Forbidden}/>
-            <Route component={NotFound}/>
-          </Switch>
-        </div>
-      </BrowserRouter>
-    );
-  }
+function App() {
+  return (
+    <Router>
+    <React.Fragment>
+      <HeaderWithContext />
+      <Switch>
+      <Route exact path="/" component={CoursesWithContext} />
+      <PrivateRoute exact path="/courses/create" component={NewCourseWithContext} />
+      <PrivateRoute exact path="/courses/:id/update" component={UpdateCourseWithContext} />
+      <Route exact path="/courses/:id" component={UsersCourseWithContext} />
+      <Route path="/signup" component={SignUpWithContext} />
+      <Route path="/signin" component={SignInWithContext} />
+      <Route path="/signOut" component={SignOutWithContext} />
+      <Route path="/forbidden" component={ErrorHandlerWithContext} />
+      <Route component={ErrorHandlerWithContext} />
+      </Switch>
+    </React.Fragment>
+  </Router>
+  );
 }
 
 export default App;
-

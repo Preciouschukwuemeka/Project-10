@@ -1,28 +1,41 @@
-import React from './node_modules/react';
-import {NavLink} from './node_modules/react-router-dom';
+import React,{ Fragment } from 'react';
+import { Link, withRouter } from 'react-router-dom';
 
-const Header = ({user}) => {
-    const checkUser = () => {
-        if(user){
-            return(
-                <nav><span>Welcome {user.firstName} {user.lastName}!</span><NavLink className="signout" to="/signout">Sign Out</NavLink></nav>
-            );
-        }else{
-            return(
-                <nav><NavLink className="signup" to="/signup">Sign Up</NavLink><NavLink className="signin" to="/signin">Sign In</NavLink></nav>
-            );
-        }
-    }
+function Header({ context:{ authenticatedUser }, location:{ pathname }}){
+ //css styling for logo color
+  const style = {
+    color:'#fff'
+  }
 
-    return(
-        //signed in
-        
-        <div className="header">
-            <div className="bounds">
-                <NavLink to="/"><h1 className="header--logo">Courses</h1></NavLink>
-                {checkUser()}
-            </div>
-            <hr />
+  return (
+    <Fragment>
+      <div className="header">
+        <div className="bounds">
+          <h1 className="header--logo"><Link style={style} to="/">Courses</Link></h1>
+          <nav>
+          {
+            //if your is authenticated then render welcome message and sign out button in header
+            (authenticatedUser !== null)?
+            <Fragment>
+              <span>Welcome,{` ${authenticatedUser.firstName} ${authenticatedUser.lastName}`} </span>
+              <Link className="signout" to="/signout">Sign Out</Link>
+            </Fragment>
+            :
+            <Fragment>
+              <Link className="signup" to="/signup">Sign Up</Link>
+              <Link 
+              className="signin" 
+              to={{ pathname:"/signin" , 
+                    state:{
+                      from :pathname
+                      }}}>Sign In</Link>
+            </Fragment>
+          }
+          </nav>
         </div>
-    );
+      </div>
+    </Fragment>
+  );
 }
+
+export default withRouter(Header)

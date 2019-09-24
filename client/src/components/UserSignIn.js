@@ -1,59 +1,114 @@
- import React,{Component} from './node_modules/react';
-import {NavLink} from './node_modules/react-router-dom';
+import React,{ Component } from 'react';
+import { Link } from 'react-router-dom';
 
-class UserSignIn extends Component {
-    state = {
-        message: null
+class SignIn extends Component{
+
+  state = {
+      emailAddress: '',
+      password: '',
+      errorMessages: null,
+  }
+
+  //changes value of state from input form 
+  change = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    this.setState({[name]: value});
+  }
+  
+  submit = async (e) => {
+    e.preventDefault();
+    const { context:{ actions:{ signIn } },location:{ state },history } = this.props;
+    const { from } = state || { from: { pathname: '/' } };
+    const { emailAddress, password } = this.state;
+
+    try{
+
+      const res = await signIn(emailAddress, password);
+      //if res is null, it means an error has occurred
+        //either wrong email or password
+      //otherwise it will move to home page or last page visited before the signed in
+      if(res.isNull) throw res;
+      else history.push(from);
+
+    }catch(err){
+
+      if(err.errors) this.setState({errorMessages:err.errors});
+
     }
+  }
 
-    async submitForm(e){
-        e.preventDefault();
-        const res = await this.props.signIn(e.target[0].value, e.target[1].value);
-        if(res === 200){
-            this.props.history.push(this.props.prevLocation);
-            this.props.setPrevLocation('/');
-        }else{
-            this.setState({message:"Invalid email or password"});
-        }
-    }
+  render(){
+    
+      //css cursor style 
+      const style = {
+          cursor: "pointer"
+      }
 
-    printErrors(){
-        if(this.state.messages !== null){
-            return(
+      const {
+          emailAddress,
+          password,
+          errorMessages
+        } = this.state;
+
+      const { errDisplay,cancel } = this.props.context.actions
+
+      return(
+          <div className="bounds">
+            <div className="grid-33 centered signin">
+                <h1>Sign In</h1>
+                {
+                  //diplayes validation messages if available 
+                  (errorMessages)?
+                  errDisplay(errorMessages)
+                  :false
+                }
                 <div>
-                    <div className="validation-errors">
-                        <ul>
-                            {this.state.message}
-                        </ul>
-                    </div>
+                    <form onSubmit={this.submit}>
+                        <div>
+                            <input 
+                            id="emailAddress" 
+                            name="emailAddress" 
+                            type="text" 
+                            className="" 
+                            placeholder="Email Address" 
+                            value={emailAddress}
+                            onChange={this.change} 
+                            />
+                        </div>
+                        <div>
+                            <input 
+                            id="password" 
+                            name="password" 
+                            type="password" 
+                            className="" 
+                            placeholder="Password" 
+                            value={password}
+                            onChange={this.change}
+                            autoComplete="off"
+                            />
+                        </div>
+                        <div className="grid-100 pad-bottom">
+                            <button 
+                            style={style} 
+                            className="button" 
+                            type="">
+                            Sign In
+                            </button>
+                            <button 
+                            style={style} 
+                            className="button button-secondary" 
+                            onClick={e => cancel(e)}>
+                            Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            );
-        }
-    }
-
-    render(){
-        return(
-            <div>
-                <div className="bounds">
-                    <div className="grid-33 centered signin">
-                    <h1>Sign In</h1>
-                    <div>
-                        {this.printErrors()}
-                        <form onSubmit={(e) => {this.submitForm(e)}}>
-                            <div><input id="emailAddress" name="emailAddress" type="text" className="" placeholder="Email Address" defaultValue="" /></div>
-                            <div><input id="password" name="password" type="password" className="" placeholder="Password" defaultValue="" /></div>
-                            <div className="grid-100 pad-bottom">
-                                <button className="button" type="submit">Sign In</button>
-                                <button className="button button-secondary" onClick={(e)=> {e.preventDefault();this.props.history.push('/');}}>Cancel</button>
-                                </div>
-                        </form>
-                    </div>
-                    <p>&nbsp;</p>
-                    <p>Don't have a user account? <NavLink to="/signup">Click here</NavLink> to sign up!</p>
-                    </div>
-                </div>
+                <p>&nbsp;</p>
+                <p>Don't have a user account? <Link to="/signup" >Click here</Link> to sign up!</p>
             </div>
-        );
-    }
+          </div>
+      );
+  }
 }
-export default UserSignIn;
+export default SignIn
