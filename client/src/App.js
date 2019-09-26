@@ -2,73 +2,57 @@ import React from 'react';
 import {
   BrowserRouter as Router,
   Route,
-  Switch,
-  Redirect
+  Switch
 } from 'react-router-dom';
-
-//components
 import Header from './components/Header';
+// import Public from './components/Public';
 import Courses from './components/Courses';
-import NewCourse from './components/CreateCourse';
-import UpdateCourse from './components/UpdateCourse';
-import CourseDetail from './components/CourseDetail';
-import UserSignUp from './components/UserSignUp';
 import UserSignIn from './components/UserSignIn';
+import UserSignUp from './components/UserSignUp';
 import UserSignOut from './components/UserSignOut';
-import ErrorHandler from './components/ErrorHandler';
+// import Authenticated from './components/Authenticated';
+import CreateCourse from './components/CreateCourse';
+import CourseDetail from './components/CourseDetail';
+import UpdateCourse from './components/UpdateCourse';
+import NotFound from './components/NotFound';
+import Forbidden from './components/Forbidden';
+import UnhandledError from './components/UnhandledError';
+
 import withContext from './Context';
+import PrivateRoute from './PrivateRoute';
 
-//components withContext
 const HeaderWithContext = withContext(Header);
-const CoursesWithContext = withContext(Courses);
-const NewCourseWithContext = withContext(NewCourse);
+// const AuthWithContext = withContext(Authenticated);
+const UserSignUpWithContext = withContext(UserSignUp);
+const UserSignInWithContext = withContext(UserSignIn);
+const UserSignOutWithContext = withContext(UserSignOut);
+const CreateCourseWithContext = withContext(CreateCourse);
 const UpdateCourseWithContext = withContext(UpdateCourse);
-const UsersCourseWithContext = withContext(CourseDetail);
-const SignUpWithContext = withContext(UserSignUp);
-const SignInWithContext = withContext(UserSignIn);
-const SignOutWithContext = withContext(UserSignOut);
-const ErrorHandlerWithContext = withContext(ErrorHandler);
+const CoursesWithContext = withContext(Courses);
+const CourseDetailWithContext = withContext(CourseDetail);
 
-
-const PrivateRoute = withContext(({context,component: Component, ...rest }) => {
-  return (
-    // Show the component only when the user is logged in
-    // Otherwise, redirect the user to /signin page
-    <Route
-      {...rest}
-      render={(props) => context.authenticatedUser !== null ? (
-          <Component {...props} />
-        ) : (
-          <Redirect to={{
-            pathname: '/signin',
-            state: { from: props.location }
-          }} />
-        )
-      }
-    />
-  );
-})
-
-
-function App() {
-  return (
-    <Router>
-    <React.Fragment>
+//sets up the routes of the app. 
+export default () => (
+  <Router>
+    <div>
       <HeaderWithContext />
-      <Switch>
-      <Route exact path="/" component={CoursesWithContext} />
-      <PrivateRoute exact path="/courses/create" component={NewCourseWithContext} />
-      <PrivateRoute exact path="/courses/:id/update" component={UpdateCourseWithContext} />
-      <Route exact path="/courses/:id" component={UsersCourseWithContext} />
-      <Route path="/signup" component={SignUpWithContext} />
-      <Route path="/signin" component={SignInWithContext} />
-      <Route path="/signOut" component={SignOutWithContext} />
-      <Route path="/forbidden" component={ErrorHandlerWithContext} />
-      <Route component={ErrorHandlerWithContext} />
-      </Switch>
-    </React.Fragment>
-  </Router>
-  );
-}
 
-export default App;
+      <Switch>
+        {/* <Route exact path="/" component={Public} /> */}
+        {/* <PrivateRoute path="/authenticated" component={AuthWithContext} /> */}
+        <Route exact path="/" component={CoursesWithContext} />
+        <PrivateRoute path="/courses/create" component={CreateCourseWithContext} />
+        <PrivateRoute path="/courses/:id/update" component={UpdateCourseWithContext} />
+        <Route path="/courses/:id" component={CourseDetailWithContext} />
+        <Route path="/signin" component={UserSignInWithContext} />
+        <Route path="/signup" component={UserSignUpWithContext} />
+        <Route path="/signout" component={UserSignOutWithContext} />
+
+        <Route path="/forbidden" component={Forbidden} />
+        <Route path="/error" component={UnhandledError} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
+  </Router>
+);
+

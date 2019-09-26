@@ -1,41 +1,33 @@
-import React,{ Fragment } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-function Header({ context:{ authenticatedUser }, location:{ pathname }}){
- //css styling for logo color
-  const style = {
-    color:'#fff'
-  }
+export default class Header extends React.PureComponent {
+  render() {
+    //bringing in the context and the authenticated user
+    const { context } = this.props;
+    const authUser = context.authenticatedUser;
 
-  return (
-    <Fragment>
+    //If user is authenticated, show welcome user sign on the top right.
+    //if user is not authenticated, show sign up and sign in.
+    return (
       <div className="header">
         <div className="bounds">
-          <h1 className="header--logo"><Link style={style} to="/">Courses</Link></h1>
+          <Link className="header--logo" to="/">Courses</Link>
           <nav>
-          {
-            //if your is authenticated then render welcome message and sign out button in header
-            (authenticatedUser !== null)?
-            <Fragment>
-              <span>Welcome,{` ${authenticatedUser.firstName} ${authenticatedUser.lastName}`} </span>
-              <Link className="signout" to="/signout">Sign Out</Link>
-            </Fragment>
-            :
-            <Fragment>
-              <Link className="signup" to="/signup">Sign Up</Link>
-              <Link 
-              className="signin" 
-              to={{ pathname:"/signin" , 
-                    state:{
-                      from :pathname
-                      }}}>Sign In</Link>
-            </Fragment>
-          }
+            {authUser ? (
+              <React.Fragment>
+                <span>Welcome, {authUser.firstName}!</span>
+                <Link to="/signout">Sign Out</Link>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <Link className="signup" to="/signup">Sign Up</Link>
+                <Link className="signin" to="/signin">Sign In</Link>
+              </React.Fragment>
+            )}
           </nav>
         </div>
       </div>
-    </Fragment>
-  );
-}
-
-export default withRouter(Header)
+    );
+  }
+};

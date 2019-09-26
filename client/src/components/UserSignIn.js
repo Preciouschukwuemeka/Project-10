@@ -1,114 +1,87 @@
-import React,{ Component } from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import Form from './Form';
 
-class SignIn extends Component{
-
+//provides the sign in screen. users can fill out email address adn passowrd and sign in or hit cancel to return to the main page.
+export default class UserSignIn extends Component {
   state = {
-      emailAddress: '',
-      password: '',
-      errorMessages: null,
+    emailAddress: '',
+    password: '',
+    errors: [],
   }
 
-  //changes value of state from input form 
-  change = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    this.setState({[name]: value});
+  render() {
+    const {
+      emailAddress,
+      password,
+      errors,
+    } = this.state;
+
+    return (
+      <div className="bounds">
+        <div className="grid-33 centered signin">
+          <h1>Sign In</h1>
+          <Form 
+            cancel={this.cancel}
+            errors={errors}
+            submit={this.submit}
+            submitButtonText="Sign In"
+            elements={() => (
+              <React.Fragment>
+                <input 
+                  id="emailAddress" 
+                  name="emailAddress" 
+                  type="email"
+                  value={emailAddress} 
+                  onChange={this.change} 
+                  placeholder="Email Address" />
+                <input 
+                  id="password" 
+                  name="password"
+                  type="password"
+                  value={password} 
+                  onChange={this.change} 
+                  placeholder="Password" />                
+              </React.Fragment>
+            )} />
+          <p>
+            Don't have a user account? <Link to="/signup">Click here</Link> to sign up!
+          </p>
+        </div>
+      </div>
+    );
   }
-  
-  submit = async (e) => {
-    e.preventDefault();
-    const { context:{ actions:{ signIn } },location:{ state },history } = this.props;
-    const { from } = state || { from: { pathname: '/' } };
+  // sets state for each event triggered by onChange
+  change = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    this.setState(() => {
+      return {
+        [name]: value
+      };
+    });
+  }
+  submit = () => {
+    const { context } = this.props;
+    const { from } = this.props.location.state || { from: { pathname: '/' } };
     const { emailAddress, password } = this.state;
-
-    try{
-
-      const res = await signIn(emailAddress, password);
-      //if res is null, it means an error has occurred
-        //either wrong email or password
-      //otherwise it will move to home page or last page visited before the signed in
-      if(res.isNull) throw res;
-      else history.push(from);
-
-    }catch(err){
-
-      if(err.errors) this.setState({errorMessages:err.errors});
-
-    }
+    // run signIn; check signIn info against database users
+    context.actions.signIn(emailAddress, password)
+      .then( user => {
+        if (user === null) {
+          this.setState(() => {
+            return { errors: [ 'Sign-in was unsuccessful' ] };
+          });
+        } else {
+          this.props.history.push(from);
+        }
+      })
+      .catch( err => {
+        console.log(err);
+        this.props.history.push('/error');
+      })
   }
-
-  render(){
-    
-      //css cursor style 
-      const style = {
-          cursor: "pointer"
-      }
-
-      const {
-          emailAddress,
-          password,
-          errorMessages
-        } = this.state;
-
-      const { errDisplay,cancel } = this.props.context.actions
-
-      return(
-          <div className="bounds">
-            <div className="grid-33 centered signin">
-                <h1>Sign In</h1>
-                {
-                  //diplayes validation messages if available 
-                  (errorMessages)?
-                  errDisplay(errorMessages)
-                  :false
-                }
-                <div>
-                    <form onSubmit={this.submit}>
-                        <div>
-                            <input 
-                            id="emailAddress" 
-                            name="emailAddress" 
-                            type="text" 
-                            className="" 
-                            placeholder="Email Address" 
-                            value={emailAddress}
-                            onChange={this.change} 
-                            />
-                        </div>
-                        <div>
-                            <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            className="" 
-                            placeholder="Password" 
-                            value={password}
-                            onChange={this.change}
-                            autoComplete="off"
-                            />
-                        </div>
-                        <div className="grid-100 pad-bottom">
-                            <button 
-                            style={style} 
-                            className="button" 
-                            type="">
-                            Sign In
-                            </button>
-                            <button 
-                            style={style} 
-                            className="button button-secondary" 
-                            onClick={e => cancel(e)}>
-                            Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <p>&nbsp;</p>
-                <p>Don't have a user account? <Link to="/signup" >Click here</Link> to sign up!</p>
-            </div>
-          </div>
-      );
+  cancel = () => {
+    this.props.history.push('/');
   }
 }
-export default SignIn
