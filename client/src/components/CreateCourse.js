@@ -137,9 +137,9 @@ class CreateCourse extends Component {
       materialsNeeded
     };
 
-    const password = prompt('Please confirm password.');
+    // const password = prompt('Please confirm password.');
 
-    context.data.createCourse(course, emailAddress, password)
+    context.data.createCourse(course, emailAddress, context.userPassword)
       .then(errors => {
         if (errors.length) {
           this.setState({ errors });
@@ -159,3 +159,5 @@ class CreateCourse extends Component {
   }
 
 }
+
+export default CreateCourse;

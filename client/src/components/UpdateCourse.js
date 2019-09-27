@@ -7,10 +7,10 @@ class UpdateCourse extends Component {
   state = {
     title: '', 
     description: '',
-    estimatedTime: '',
+    //estimatedTime: '',
     materialsNeeded: '', 
     errors: []
-  }
+    }
 
   componentDidMount() {
     this.props.context.data.getCourse(this.props.match.params.id)
@@ -83,9 +83,9 @@ class UpdateCourse extends Component {
     };
 
     const id = this.props.match.params.id;
-    const password = prompt('Please confirm password.');
+    // const password = prompt('Please confirm password.');
 
-    context.data.updateCourse(id, course, emailAddress, password)
+    context.data.updateCourse(id, course, emailAddress, context.userPassword)
       .then(errors => {
         if (errors.length) {
           this.setState({ errors });
@@ -100,7 +100,8 @@ class UpdateCourse extends Component {
   }
 
   cancel = () => {
-    this.props.history.push('/');
+    const id = this.props.match.params.id;
+    this.props.history.push(`/courses/${id}`);
   }
 
   render() {
@@ -108,8 +109,6 @@ class UpdateCourse extends Component {
     const {
       title,
       description,
-      estimatedTime,
-      materialsNeeded,
       errors,
     } = this.state;
 
@@ -167,7 +166,7 @@ class UpdateCourse extends Component {
                             id="estimatedTime" name="estimatedTime" 
                             type="text" className="course--time--input"
                             placeholder="Hours" 
-                            value={estimatedTime}
+                            value={this.state.value}
                             onChange={this.change} />
                         </div>
                       </li>
@@ -178,7 +177,7 @@ class UpdateCourse extends Component {
                             id="materialsNeeded" name="materialsNeeded" 
                             className="" 
                             placeholder="List materials..." 
-                            value={materialsNeeded}
+                            value={this.state.value}
                             onChange={this.change} />
                         </div>
                       </li>
@@ -194,3 +193,4 @@ class UpdateCourse extends Component {
 }
 
 export default UpdateCourse;
+

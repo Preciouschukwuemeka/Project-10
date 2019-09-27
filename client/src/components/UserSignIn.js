@@ -7,7 +7,7 @@ export default class UserSignIn extends Component {
   state = {
     emailAddress: '',
     password: '',
-    errors: [],
+    errors: []
   }
 
   render() {

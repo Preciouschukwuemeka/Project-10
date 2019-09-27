@@ -1,4 +1,4 @@
- import React from 'react';
+import React from 'react';
 
 //displays a message letting the user know that the requested page can't be found
 export default () => (
