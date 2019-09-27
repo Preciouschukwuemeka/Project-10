@@ -7,7 +7,7 @@ class UpdateCourse extends Component {
   state = {
     title: '', 
     description: '',
-    //estimatedTime: '',
+    estimatedTime: '',
     materialsNeeded: '', 
     errors: []
     }
