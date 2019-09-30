@@ -4,7 +4,6 @@ import React from 'react';
 export default (props) => {
   const {
     cancel,
-    errors,
     submit,
     submitButtonText,
     elements,
@@ -22,7 +21,7 @@ export default (props) => {
 
   return (
     <div>
-      <ErrorsDisplay errors={errors} />
+      <ErrorsDisplay errors={props.errors} />
       <form onSubmit={handleSubmit}>
         {elements()}
         <div className="pad-bottom">
@@ -37,7 +36,7 @@ export default (props) => {
 function ErrorsDisplay({ errors }) {
   let errorsDisplay = null;
 
-  if (errors.length) {
+  if (errors.length > 0) {
     errorsDisplay = (
       <div>
         <h2 className="validation--errors--label">Validation errors</h2>

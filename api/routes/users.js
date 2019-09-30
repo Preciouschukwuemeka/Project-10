@@ -34,8 +34,7 @@ router.post('/', [
     .withMessage('Please provide a value for "password"')
     .isLength({ min: 8, max: 20 })
     .withMessage('Please provide a "password" that is between 8 and 20 characters in length')
-], 
-  async(req, res, next)=>{
+], async (req, res, next)=>{
   // Attempt to get the validation result from the Request object.
   const errors = validationResult(req);
 
@@ -45,10 +44,10 @@ router.post('/', [
     const errorMessages = errors.array().map(error => error.msg);
     
     // Return the validation errors to the client.
-    const err = new Error(errorMessages);
-    //err.errors = errorMessages;
+    const err = new Error();
     err.status = 400;
-    next(err);   
+    err.errors=errorMessages;
+    next(err);
   
   } else {
 
@@ -67,7 +66,7 @@ router.post('/', [
     } catch (err) {
       if(err.name === 'SequelizeValidationError') {
         res.status(400).json({message: "Hmm...Something's not right. Please fill out all the required fields."});
-        next(err);
+        next();
       } else {
         res.status(400).json({message: 'Sorry that email address already exists. Try again.'});
       }
@@ -76,10 +75,3 @@ router.post('/', [
   
 });
 module.exports = router;
-
-
-
-
-
-
-

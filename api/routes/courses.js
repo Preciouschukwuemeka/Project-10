@@ -8,7 +8,7 @@ const { check, validationResult } = require('express-validator');
 const filterOut = {
   include: [{
     model: User,
-    attributes: {exclude: ['password', 'createdAt', 'updatedAt']}
+    attributes: {exclude: ['createdAt', 'updatedAt']}
   }],
   attributes: {exclude: ['createdAt', 'updatedAt']}
 }
@@ -58,8 +58,9 @@ router.post('/', [
     const errorMessages = errors.array().map(error => error.msg);
 
     // Return the validation errors to the client.
-    const err = new Error(errorMessages);
+    const err = new Error();
     err.status = 400;
+    err.errors=errorMessages;
     next(err);
   } else {
 
@@ -104,8 +105,9 @@ router.put('/:id', [
     const errorMessages = errors.array().map(error => error.msg);
 
     // Return the validation errors to the client.
-    const err = new Error(errorMessages);
+    const err = new Error();
     err.status = 400;
+    err.errors=errorMessages;
     next(err);  
   } else {
       Course.findByPk(req.params.id)
@@ -153,3 +155,4 @@ router.delete("/:id", authenticateUser, (req, res, next) => {
 });
 
 module.exports = router;
+

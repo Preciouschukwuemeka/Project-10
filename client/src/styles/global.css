@@ -207,7 +207,7 @@ body {
 
 /* line 13, ../sass/global.sass */
 .header {
-  background: #57496e;
+  background: red;
   padding: 20px 0;
   margin-bottom: 30px;
 }
